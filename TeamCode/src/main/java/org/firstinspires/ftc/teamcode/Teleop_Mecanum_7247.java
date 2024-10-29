@@ -165,7 +165,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             rightBackDrive.setPower(rightBackPower);
             Arm.setPower(Arm_power);
             if (SpinyThingy_power == true){
-                SpinyThingy.setPosition(0);
+                SpinyThingy.setPosition(0.25);
             }
             else{SpinyThingy.setPosition(.5);
                 if(SpinyReverse == true){
