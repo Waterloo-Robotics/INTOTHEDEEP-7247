@@ -103,9 +103,9 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
          // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         double Wrist_power = 0.5;
@@ -123,9 +123,9 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y * .5;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x * .5;
-            double turn    =  gamepad1.right_stick_x * .3 ;
+            double axial   = -gamepad1.left_stick_y * .7;  // Note: pushing stick forward gives negative value
+            double lateral =  gamepad1.left_stick_x * .7;
+            double turn    =  gamepad1.right_stick_x * .5 ;
             double Arm_power    =  gamepad2.left_stick_y;
             boolean SpinyThingy_power = gamepad2.right_bumper;
             boolean SpinyReverse = gamepad2.left_bumper;
@@ -135,10 +135,10 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower  = axial + lateral + turn;
-            double rightFrontPower = axial - lateral - turn;
-            double leftBackPower   = axial - lateral + turn;
-            double rightBackPower  = axial + lateral - turn;
+            double leftFrontPower  = axial + lateral - turn;
+            double rightFrontPower = axial - lateral + turn;
+            double leftBackPower   = axial - lateral - turn;
+            double rightBackPower  = axial + lateral + turn;
 
             // Normalize the values so no wheel power exceeds 100%
             // This ensures that the robot maintains the desired motion.
