@@ -32,9 +32,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -75,7 +78,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private DcMotor Arm = null;
-    private Servo SpinyThingy = null;
+    private CRServo SpinyThingy = null;
+    private Servo Wrist = null;
 
     @Override
     public void runOpMode() {
@@ -87,7 +91,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         Arm = hardwareMap.get(DcMotor.class, "Arm");
-        SpinyThingy = hardwareMap.get(Servo.class, "Intake");
+        SpinyThingy = hardwareMap.get(CRServo.class, "Intake");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -98,10 +103,13 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
          // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        double Wrist_power = 0.5;
+        Wrist.setPosition(Wrist_power);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -115,12 +123,16 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x;
-            double turn    =  gamepad1.right_stick_x *.5 ;
+            double axial   = -gamepad1.left_stick_y * .5;  // Note: pushing stick forward gives negative value
+            double lateral =  gamepad1.left_stick_x * .5;
+            double turn    =  gamepad1.right_stick_x * .3 ;
             double Arm_power    =  gamepad2.left_stick_y;
             boolean SpinyThingy_power = gamepad2.right_bumper;
             boolean SpinyReverse = gamepad2.left_bumper;
+            Wrist_power += gamepad2.right_stick_x * 0.001;
+            Wrist_power = Range.clip(Wrist_power, 0, 1.0);
+
+
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
             double leftFrontPower  = axial + lateral + turn;
@@ -134,7 +146,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             max = Math.max(max, Math.abs(leftBackPower));
             max = Math.max(max, Math.abs(rightBackPower));
 
-            if (max > 0) {
+            if (max > 1) {
                 leftFrontPower  /= max;
                 rightFrontPower /= max;
                 leftBackPower   /= max;
@@ -164,22 +176,24 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
             Arm.setPower(Arm_power);
-            if (SpinyThingy_power == true){
-                SpinyThingy.setPosition(0);
+            Wrist.setPosition(Wrist_power);
+
+            if (SpinyThingy_power) {
+                SpinyThingy.setPower(-1);
+            } else if (SpinyReverse) {
+                SpinyThingy.setPower(1);
+            } else {
+                SpinyThingy.setPower(0);
             }
-            else{SpinyThingy.setPosition(.5);
-                if(SpinyReverse == true){
-                    SpinyThingy.setPosition(1);
-                }
-                else{SpinyThingy.setPosition(.5);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("Wrist Position", Wrist_power);
             telemetry.update();
 
 
         }
-    }}}}
+    }}
 //Back left is port 0 Front left is port 1 Back right is port 2 front right is port 3
