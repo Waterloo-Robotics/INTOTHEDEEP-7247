@@ -81,6 +81,12 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
     private CRServo SpinyThingy = null;
     private Servo Wrist = null;
 
+    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
+    static final double     WHEEL_DIAMETER_INCHES   = 4.1 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
     @Override
     public void runOpMode() {
 
@@ -131,6 +137,9 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             boolean SpinyReverse = gamepad2.left_bumper;
             Wrist_power += gamepad2.right_stick_x * 0.001;
             Wrist_power = Range.clip(Wrist_power, 0, 1.0);
+            boolean Score = gamepad2.dpad_up;
+            boolean ArmPickUp = gamepad2.dpad_down;
+            boolean Hang = gamepad2.dpad_left;
 
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
@@ -177,6 +186,18 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             rightBackDrive.setPower(rightBackPower);
             Arm.setPower(Arm_power);
             Wrist.setPosition(Wrist_power);
+
+            if(ArmPickUp) {
+                Arm.setTargetPosition(-4902);
+                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            } else if(Score) {
+                Arm.setTargetPosition(-3400);
+                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            } else if(Hang) {
+                Arm.setTargetPosition(-2506);
+                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+
 
             if (SpinyThingy_power) {
                 SpinyThingy.setPower(-1);
