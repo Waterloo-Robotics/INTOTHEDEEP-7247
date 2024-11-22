@@ -62,7 +62,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Encoder Auto", group="Robot")
 
-public class Drive_Auto extends LinearOpMode {
+public class Park_Auto extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor         leftFrontDrive   = null;
