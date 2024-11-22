@@ -61,7 +61,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Robot: Auto Drive By Encoder", group="Robot")
+@Autonomous(name="Encoder Auto", group="Robot")
 
 public class Encoder_auto_7247 extends LinearOpMode {
 
@@ -70,6 +70,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
     private DcMotor         rightFrontDrive  = null;
     private DcMotor         leftBackdrive = null;
     private DcMotor         rightBackdrive = null;
+    private DcMotor         Arm = null;
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -79,13 +80,13 @@ public class Encoder_auto_7247 extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
+    static final double     COUNTS_PER_MOTOR_REV    = 384.5 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     static final double     WHEEL_DIAMETER_INCHES   = 4.1 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
+
 
     @Override
     public void runOpMode() {
@@ -95,6 +96,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackdrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackdrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        Arm = hardwareMap.get(DcMotor.class,"Arm");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -108,18 +110,23 @@ public class Encoder_auto_7247 extends LinearOpMode {
         leftBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBackdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Starting at",  "%7d :%7d",
                           leftFrontDrive.getCurrentPosition(),
                           rightFrontDrive.getCurrentPosition(),
                           leftBackdrive.getCurrentPosition(),
-                          rightBackdrive.getCurrentPosition());
+                          rightBackdrive.getCurrentPosition(),
+                          Arm.getCurrentPosition());
+
+
         telemetry.update();
 
         // Wait for the game to start (driver presses START)
@@ -127,9 +134,16 @@ public class Encoder_auto_7247 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+
+        encoderDrive(DRIVE_SPEED,  6, 6, 6, 6,30);
+                // S1: Forward 47 Inches with 5 Sec timeout
+        Arm.setTargetPosition(-3400);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(opModeIsActive() && Arm.getCurrentPosition() >= -3400) {
+            Arm.setPower(.5);
+        }
+
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -145,8 +159,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
      *  3) Driver stops the OpMode running.
      */
     public void encoderDrive(double speed,
-                             double leftInches, double rightInches,
-                             double timeoutS) {
+                             double FleftInches, double FrightInches, double BleftInches, double BrightInches, double timeoutS) {
         int newLeftTarget;
         int newRightTarget;
         int newBRightTarget;
@@ -156,10 +169,11 @@ public class Encoder_auto_7247 extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newBLeftTarget = leftBackdrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = rightFrontDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newBRightTarget = rightBackdrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int)(FleftInches * COUNTS_PER_INCH);
+            newBLeftTarget = leftBackdrive.getCurrentPosition() + (int)(BleftInches * COUNTS_PER_INCH);
+            newRightTarget = rightFrontDrive.getCurrentPosition() + (int)(FrightInches * COUNTS_PER_INCH);
+            newBRightTarget = rightBackdrive.getCurrentPosition() + (int)(BrightInches * COUNTS_PER_INCH);
+
             leftFrontDrive.setTargetPosition(newLeftTarget);
             leftBackdrive.setTargetPosition(newBLeftTarget);
             rightFrontDrive.setTargetPosition(newRightTarget);
@@ -192,6 +206,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
                 telemetry.addData("Currently at",  " at %7d :%7d",
                         leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition(),
                         leftBackdrive.getCurrentPosition(),rightBackdrive.getCurrentPosition());
+                telemetry.addData("Elapsed Time %d", runtime.seconds());
                 telemetry.update();
             }
 

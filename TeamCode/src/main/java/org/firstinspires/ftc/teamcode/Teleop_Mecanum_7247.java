@@ -187,17 +187,30 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             Arm.setPower(Arm_power);
             Wrist.setPosition(Wrist_power);
 
-            if(ArmPickUp) {
-                Arm.setTargetPosition(-4902);
-                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else if(Score) {
-                Arm.setTargetPosition(-3400);
-                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            } else if(Hang) {
-                Arm.setTargetPosition(-2506);
-                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-
+//            if(ArmPickUp) {
+//                Arm.setTargetPosition(-4902);
+//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                while(opModeIsActive() && Arm.getCurrentPosition() >= -4902 && !gamepad1.a){
+//                    Arm.setPower(.5);
+//                }
+//
+//
+//            }  if(Score) {
+//                Arm.setTargetPosition(-3400);
+//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                while(opModeIsActive() && Arm.getCurrentPosition() >= -3400){
+//                    Arm.setPower(.5);
+//                }
+//
+//            }
+//
+//            if(Hang) {
+//                Arm.setTargetPosition(-2506);
+//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                while(opModeIsActive() && Arm.getCurrentPosition() >= -2506){
+//                    Arm.setPower(.5);
+//                }
+//            }
 
             if (SpinyThingy_power) {
                 SpinyThingy.setPower(-1);
