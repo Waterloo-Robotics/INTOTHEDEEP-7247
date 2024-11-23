@@ -32,8 +32,11 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
@@ -61,7 +64,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Encoder Auto", group="Robot")
+@Autonomous(name="Score Auto", group="Robot")
 
 public class Encoder_auto_7247 extends LinearOpMode {
 
@@ -71,6 +74,9 @@ public class Encoder_auto_7247 extends LinearOpMode {
     private DcMotor         leftBackdrive = null;
     private DcMotor         rightBackdrive = null;
     private DcMotor         Arm = null;
+    private CRServo         Intake = null;
+    private Servo Wrist = null;
+
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -97,7 +103,8 @@ public class Encoder_auto_7247 extends LinearOpMode {
         leftBackdrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackdrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         Arm = hardwareMap.get(DcMotor.class,"Arm");
-
+        Intake = hardwareMap.get(CRServo.class, "Intake");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -105,6 +112,8 @@ public class Encoder_auto_7247 extends LinearOpMode {
         leftBackdrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackdrive.setDirection(DcMotor.Direction.FORWARD);
+        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Wrist.setPosition(0.4);
 
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -135,15 +144,30 @@ public class Encoder_auto_7247 extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
 
-        encoderDrive(DRIVE_SPEED,  6, 6, 6, 6,30);
+        encoderDrive(DRIVE_SPEED,  7, 7, 7, 7,30);
                 // S1: Forward 47 Inches with 5 Sec timeout
         Arm.setTargetPosition(-3400);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         while(opModeIsActive() && Arm.getCurrentPosition() >= -3400) {
             Arm.setPower(.5);
         }
+        while(opModeIsActive() && Arm.getCurrentPosition() <= -3400) {
+            Intake.setPower(1);
+        }
 
 
+        Arm.setTargetPosition(-2506);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(opModeIsActive() && Arm.getCurrentPosition() <= -2506) {
+            Intake.setPower(0);
+        }
+        sleep(1000);
+        encoderDrive(DRIVE_SPEED,  49, -49, -49, 49,30);
+        encoderDrive(DRIVE_SPEED,  10, 10, 10, 10,30);
+        encoderDrive(DRIVE_SPEED,  -25, -25, -25, -25,30);
+
+        Arm.setTargetPosition(-1359);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

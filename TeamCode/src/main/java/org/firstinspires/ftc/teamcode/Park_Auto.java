@@ -60,7 +60,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Encoder Auto", group="Robot")
+@Autonomous(name="Park Auto", group="Robot")
 
 public class Park_Auto extends LinearOpMode {
 
@@ -84,7 +84,7 @@ public class Park_Auto extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.1 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
+    static final double     DRIVE_SPEED             = 0.4;
 
 
     @Override
