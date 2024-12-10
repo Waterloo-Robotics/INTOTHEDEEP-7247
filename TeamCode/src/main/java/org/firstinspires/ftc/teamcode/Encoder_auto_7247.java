@@ -113,8 +113,8 @@ public class Encoder_auto_7247 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackdrive.setDirection(DcMotor.Direction.FORWARD);
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Wrist.setPosition(0.4);
-
+        Wrist.setPosition(0.3);
+//      closer to zero is closer towards the wall
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -163,8 +163,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
         }
         sleep(1000);
         encoderDrive(DRIVE_SPEED,  49, -49, -49, 49,30);
-        encoderDrive(DRIVE_SPEED,  10, 10, 10, 10,30);
-        encoderDrive(DRIVE_SPEED,  -25, -25, -25, -25,30);
+        encoderDrive(DRIVE_SPEED,  -18, -18, -18, -18,30);
 
         Arm.setTargetPosition(-1359);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
