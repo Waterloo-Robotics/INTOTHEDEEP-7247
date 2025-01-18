@@ -34,10 +34,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import java.util.Timer;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -78,7 +83,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private DcMotor Arm = null;
-    private CRServo SpinyThingy = null;
+    private DcMotor Slide = null;
+    private Servo Claw = null;
     private Servo Wrist = null;
 
     static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
@@ -86,6 +92,13 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.1 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
+
+
+
+    /* Slide State Variables */
+    boolean slide_homed;
+    ElapsedTime slide_home_timer;
+    boolean slide_home_timer_started;
 
     @Override
     public void runOpMode() {
@@ -97,8 +110,9 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         Arm = hardwareMap.get(DcMotor.class, "Arm");
-        SpinyThingy = hardwareMap.get(CRServo.class, "Intake");
+        Claw = hardwareMap.get(Servo.class, "Claw");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
+        Slide = hardwareMap.get(DcMotor.class, "Slide");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -114,8 +128,11 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        double Wrist_power = 0.5;
-        Wrist.setPosition(Wrist_power);
+        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        /* Slide Init */
+        slide_homed = false;
+        slide_home_timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        slide_home_timer_started = false;
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -129,25 +146,26 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y * .7;  // Note: pushing stick forward gives negative value
+            double axial   = gamepad1.left_stick_y * .7;  // Note: pushing stick forward gives negative value
             double lateral =  gamepad1.left_stick_x * .7;
             double turn    =  gamepad1.right_stick_x * .5 ;
             double Arm_power    =  gamepad2.left_stick_y;
-            boolean SpinyThingy_power = gamepad2.right_bumper;
-            boolean SpinyReverse = gamepad2.left_bumper;
-            Wrist_power += gamepad2.right_stick_x * 0.001;
-            Wrist_power = Range.clip(Wrist_power, 0, 1.0);
+            boolean ClawClose = gamepad1.right_bumper;
+            boolean ClawOpen = gamepad1.left_bumper;
+            boolean WristPickUp = gamepad2.b;
+            boolean WristFlat = gamepad2.a;
             boolean Score = gamepad2.dpad_up;
-            boolean ArmPickUp = gamepad2.dpad_down;
-            boolean Hang = gamepad2.dpad_left;
+            boolean PickUp = gamepad2.dpad_down;
+            boolean Retract = gamepad2.dpad_left;
+            boolean Lowscore = gamepad2.dpad_right;
 
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower  = axial + lateral - turn;
-            double rightFrontPower = axial - lateral + turn;
-            double leftBackPower   = axial - lateral - turn;
-            double rightBackPower  = axial + lateral + turn;
+            double leftFrontPower  = axial - lateral - turn;
+            double rightFrontPower = axial + lateral + turn;
+            double leftBackPower   = axial + lateral - turn;
+            double rightBackPower  = axial - lateral + turn;
 
             // Normalize the values so no wheel power exceeds 100%
             // This ensures that the robot maintains the desired motion.
@@ -184,47 +202,101 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
-            Arm.setPower(Arm_power);
-            Wrist.setPosition(Wrist_power);
 
-//            if(ArmPickUp) {
-//                Arm.setTargetPosition(-4902);
-//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                while(opModeIsActive() && Arm.getCurrentPosition() >= -4902 && !gamepad1.a){
-//                    Arm.setPower(.5);
-//                }
-//
-//
-//            }  if(Score) {
-//                Arm.setTargetPosition(-3400);
-//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                while(opModeIsActive() && Arm.getCurrentPosition() >= -3400){
-//                    Arm.setPower(.5);
-//                }
-//
-//            }
-//
-//            if(Hang) {
-//                Arm.setTargetPosition(-2506);
-//                Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                while(opModeIsActive() && Arm.getCurrentPosition() >= -2506){
-//                    Arm.setPower(.5);
-//                }
-//            }
+            if (Arm_power < 0 && Arm.getCurrentPosition() < -390) {
 
-            if (SpinyThingy_power) {
-                SpinyThingy.setPower(-1);
-            } else if (SpinyReverse) {
-                SpinyThingy.setPower(1);
+                Arm.setPower(0);
+
             } else {
-                SpinyThingy.setPower(0);
+
+                Arm.setPower(Arm_power);
+
             }
 
+            // 1. Do we know where the slide is?
+            // Yes. -> Do normal controls
+            if (slide_homed) {
+
+            }
+            // No. We need to find it
+            else
+            {
+                // Just start moving down
+                Slide.setPower(0.35);
+                if (!slide_home_timer_started) {
+                    slide_home_timer.reset();
+                    slide_home_timer_started = true;
+                }
+
+                // If the slide has more or less stopped
+                if ((((DcMotorEx)Slide).getVelocity(AngleUnit.DEGREES) < 30) &&
+                        (slide_home_timer.milliseconds() > 250) && slide_home_timer_started)
+                {
+                    Slide.setPower(0);
+                    Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    Slide.setTargetPosition(0);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    slide_homed = true;
+                }
+
+            }
+
+            if(PickUp) {
+                Slide.setTargetPosition(-735);
+                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(.8);
+                Claw.setPosition(-1);
+
+                }
+//
+//
+             if(Score) {
+                 Slide.setTargetPosition(-1500);
+                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Slide.setPower(.8);
+                 Wrist.setPosition(0);
+                }
+//
+//            }
+//
+//            if(LowScore) {
+//                Slide.setTargetPosition(0);
+//                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                while(opModeIsActive() && Slide.getCurrentPosition() >= -2506){
+//                    Slide.setPower(.5);
+//                }
+//            }
+             if(Retract) {
+                 Wrist.setPosition(1);
+                Slide.setTargetPosition(0);
+                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(.8);
+                }
+//
+            if (WristPickUp) {
+                Wrist.setPosition(0);
+            }
+
+
+            if (WristFlat) {
+                Wrist.setPosition(1);
+            }
+
+            if (ClawClose) {
+                Claw.setPosition(1);
+            }
+
+            if (ClawOpen) {
+                Claw.setPosition(-1);
+            }
             // Show the elapsed game time and wheel power.
+            telemetry.addData("Slide Power", "%4.2f", Slide.getPower());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("Wrist Position", Wrist_power);
+            telemetry.addData("Wrist Position", Wrist.getPosition());
+            telemetry.addData("Slide Position", Slide.getCurrentPosition());
+            telemetry.addData("Arm Position",  Arm.getCurrentPosition());
             telemetry.update();
 
 
