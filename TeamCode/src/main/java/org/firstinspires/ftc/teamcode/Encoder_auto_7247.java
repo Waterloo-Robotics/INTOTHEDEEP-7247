@@ -74,7 +74,8 @@ public class Encoder_auto_7247 extends LinearOpMode {
     private DcMotor         leftBackdrive = null;
     private DcMotor         rightBackdrive = null;
     private DcMotor         Arm = null;
-    private CRServo         Intake = null;
+    private DcMotor         Slide = null;
+    private Servo         Claw = null;
     private Servo Wrist = null;
 
 
@@ -102,8 +103,9 @@ public class Encoder_auto_7247 extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackdrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackdrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        Slide = hardwareMap.get(DcMotor.class, "Slide");
         Arm = hardwareMap.get(DcMotor.class,"Arm");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
+        Claw = hardwareMap.get(Servo.class, "Claw");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -113,27 +115,30 @@ public class Encoder_auto_7247 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackdrive.setDirection(DcMotor.Direction.FORWARD);
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Wrist.setPosition(0.3);
+        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //      closer to zero is closer towards the wall
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBackdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBackdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+        Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Send telemetry message to indicate successful Encoder reset
         telemetry.addData("Starting at",  "%7d :%7d",
                           leftFrontDrive.getCurrentPosition(),
                           rightFrontDrive.getCurrentPosition(),
                           leftBackdrive.getCurrentPosition(),
                           rightBackdrive.getCurrentPosition(),
-                          Arm.getCurrentPosition());
+                          Arm.getCurrentPosition(),
+                          Slide.getCurrentPosition());
+
 
 
         telemetry.update();
@@ -143,30 +148,33 @@ public class Encoder_auto_7247 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-
-        encoderDrive(DRIVE_SPEED,  7, 7, 7, 7,30);
+        Claw.setPosition(0);
+        encoderDrive(DRIVE_SPEED,  6, 6, 6, 6,5);
                 // S1: Forward 47 Inches with 5 Sec timeout
-        Arm.setTargetPosition(-3400);
+        Slide.setPower(.5);
+        Slide.setTargetPosition(-1500);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Arm.setPower(.5);
+        Arm.setTargetPosition(-2900);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while(opModeIsActive() && Arm.getCurrentPosition() >= -3400) {
-            Arm.setPower(.5);
-        }
-        while(opModeIsActive() && Arm.getCurrentPosition() <= -3400) {
-            Intake.setPower(1);
-        }
+            Claw.setPosition(-1);
 
+        sleep(3000);
 
-        Arm.setTargetPosition(-2506);
+        Arm.setTargetPosition(-2564);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while(opModeIsActive() && Arm.getCurrentPosition() <= -2506) {
-            Intake.setPower(0);
-        }
-        sleep(1000);
+        Slide.setTargetPosition(0);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        sleep(3000);
+
         encoderDrive(DRIVE_SPEED,  49, -49, -49, 49,30);
         encoderDrive(DRIVE_SPEED,  -18, -18, -18, -18,30);
 
-        Arm.setTargetPosition(-1359);
-        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Slide.setTargetPosition(-759);
+//        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Arm.setTargetPosition(-1400);
+//        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -238,6 +246,8 @@ public class Encoder_auto_7247 extends LinearOpMode {
             leftBackdrive.setPower(0);
             rightFrontDrive.setPower(0);
             rightBackdrive.setPower(0);
+            Arm.setPower(0);
+            Slide.setPower(0);
 
             // Turn off RUN_TO_POSITION
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

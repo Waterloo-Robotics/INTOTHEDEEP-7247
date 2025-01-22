@@ -110,6 +110,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         Arm = hardwareMap.get(DcMotor.class, "Arm");
+        Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Claw = hardwareMap.get(Servo.class, "Claw");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
@@ -146,12 +148,12 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = gamepad1.left_stick_y * .7;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x * .7;
-            double turn    =  gamepad1.right_stick_x * .5 ;
-            double Arm_power    =  gamepad2.left_stick_y;
-            boolean ClawClose = gamepad1.right_bumper;
-            boolean ClawOpen = gamepad1.left_bumper;
+            double axial   = gamepad1.left_stick_y * .5;  // Note: pushing stick forward gives negative value
+            double lateral =  gamepad1.left_stick_x * .5;
+            double turn    =  gamepad1.right_stick_x * .5;
+            double Arm_power    =  gamepad2.left_stick_y * .5;
+            boolean ClawClose = gamepad2.right_bumper;
+            boolean ClawOpen = gamepad2.left_bumper;
             boolean WristPickUp = gamepad2.b;
             boolean WristFlat = gamepad2.a;
             boolean Score = gamepad2.dpad_up;
@@ -203,7 +205,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            if (Arm_power < 0 && Arm.getCurrentPosition() < -390) {
+            if (Arm_power < 0 && Arm.getCurrentPosition() < -2900) {
 
                 Arm.setPower(0);
 
@@ -241,8 +243,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
 
             }
 
-            if(PickUp) {
-                Slide.setTargetPosition(-735);
+            if(PickUp && Arm.getCurrentPosition() < -580) {
+                Slide.setTargetPosition(-900);
                 Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(.8);
                 Claw.setPosition(-1);
@@ -250,11 +252,10 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
                 }
 //
 //
-             if(Score) {
+             if(Score && Arm.getCurrentPosition() < -675) {
                  Slide.setTargetPosition(-1500);
                 Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 Slide.setPower(.8);
-                 Wrist.setPosition(0);
                 }
 //
 //            }

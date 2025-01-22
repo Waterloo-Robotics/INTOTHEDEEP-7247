@@ -130,7 +130,7 @@ public class Park_Auto extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
 
-        encoderDrive(DRIVE_SPEED,  -48, -48, -48, -48,30);
+        encoderDrive(DRIVE_SPEED,  50, 50, 50, 50,30);
                 // S1: Forward 47 Inches with 5 Sec timeout
 
 
