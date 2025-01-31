@@ -111,7 +111,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         Arm = hardwareMap.get(DcMotor.class, "Arm");
         Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Arm.setTargetPosition(0);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Claw = hardwareMap.get(Servo.class, "Claw");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
@@ -205,15 +206,29 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            if (Arm_power < 0 && Arm.getCurrentPosition() < -2900) {
+            double new_target;
 
-                Arm.setPower(0);
+            new_target = (int)(Arm.getCurrentPosition() + Arm_power * 300);
 
-            } else {
-
-                Arm.setPower(Arm_power);
-
+            if (new_target < -2900) {
+                new_target = -2900;
             }
+
+            if (new_target > 0) {
+                new_target = 0;
+            }
+            Arm.setPower(1);
+            Arm.setTargetPosition( (int)new_target);
+
+//            if (Arm_power < 0 && Arm.getCurrentPosition() < -2700) {
+//
+//                Arm.setPower(0);
+//
+//            } else {
+//
+//                Arm.setPower(Arm_power);
+//
+//            }
 
             // 1. Do we know where the slide is?
             // Yes. -> Do normal controls
@@ -252,7 +267,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
                 }
 //
 //
-             if(Score && Arm.getCurrentPosition() < -675) {
+             if(Score && Arm.getCurrentPosition() < -875) {
                  Slide.setTargetPosition(-1500);
                 Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 Slide.setPower(.8);
@@ -298,6 +313,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
             telemetry.addData("Wrist Position", Wrist.getPosition());
             telemetry.addData("Slide Position", Slide.getCurrentPosition());
             telemetry.addData("Arm Position",  Arm.getCurrentPosition());
+            telemetry.addData("Arm Target Position", Arm.getTargetPosition());
             telemetry.update();
 
 

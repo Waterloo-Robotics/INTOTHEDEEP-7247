@@ -92,8 +92,7 @@ public class Encoder_auto_7247 extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = 4.1 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-
+    static final double     DRIVE_SPEED             = 0.4;
 
     @Override
     public void runOpMode() {
@@ -114,7 +113,6 @@ public class Encoder_auto_7247 extends LinearOpMode {
         leftBackdrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackdrive.setDirection(DcMotor.Direction.FORWARD);
-        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //      closer to zero is closer towards the wall
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -148,8 +146,9 @@ public class Encoder_auto_7247 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        Claw.setPosition(0);
-        encoderDrive(DRIVE_SPEED,  6, 6, 6, 6,5);
+        Claw.setPosition(1);
+        sleep(500);
+        encoderDrive(DRIVE_SPEED,  8, 6, 8, 6,5);
                 // S1: Forward 47 Inches with 5 Sec timeout
         Slide.setPower(.5);
         Slide.setTargetPosition(-1500);
@@ -157,19 +156,74 @@ public class Encoder_auto_7247 extends LinearOpMode {
         Arm.setPower(.5);
         Arm.setTargetPosition(-2900);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            Claw.setPosition(-1);
 
         sleep(3000);
+        Claw.setPosition(0);
 
+        sleep(500);
+
+        Arm.setTargetPosition(-2400);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        encoderDrive(DRIVE_SPEED,  16.5, -19, 16.5, -19,30);
+        encoderDrive(DRIVE_SPEED,  8, 8, 8, 8,30);
+        Slide.setPower(.4);
+        Wrist.setPosition(1);
+//  -426 is right on 2nd block
+        Slide.setTargetPosition(-655);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(1500);
+        encoderDrive(DRIVE_SPEED,  4.5, -4.5, -4.5, 4.5,30);
+
+        encoderDrive(DRIVE_SPEED,  -12, -12, -12, -12,30);
+        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        sleep(2000);
+
+        Arm.setPower(.4);
+        Arm.setTargetPosition(-400);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        sleep(3000);
+        Claw.setPosition(1);
+        sleep(1000);
+
+        Arm.setPower(.4);
         Arm.setTargetPosition(-2564);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        encoderDrive(DRIVE_SPEED,  4, 4, 4, 4,5);
+        encoderDrive(DRIVE_SPEED,  14, -14, -14, 14,5);
+        encoderDrive(DRIVE_SPEED,  -3, 3, -3,3 ,30);
+        sleep(1000);
+
+        Slide.setPower(.5);
+        Slide.setTargetPosition(-1500);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        Arm.setPower(.5);
+        Arm.setTargetPosition(-2900);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Wrist.setPosition(0);
+        sleep(3000);
+        Claw.setPosition(0);
+
+        Arm.setTargetPosition(-2400);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Slide.setTargetPosition(0);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(800);
+        Arm.setTargetPosition(0);
+        Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        sleep(3000);
 
-        encoderDrive(DRIVE_SPEED,  49, -49, -49, 49,30);
-        encoderDrive(DRIVE_SPEED,  -18, -18, -18, -18,30);
+//        encoderDrive(DRIVE_SPEED,  49, -49, -49, 49,30);
+//        encoderDrive(DRIVE_SPEED,  -18, -18, -18, -18,30);
 
 //        Slide.setTargetPosition(-759);
 //        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
