@@ -210,8 +210,8 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
 
             new_target = (int)(Arm.getCurrentPosition() + Arm_power * 300);
 
-            if (new_target < -2900) {
-                new_target = -2900;
+            if (new_target < -2700) {
+                new_target = -2700;
             }
 
             if (new_target > 0) {
@@ -262,7 +262,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
                 Slide.setTargetPosition(-900);
                 Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(.8);
-                Claw.setPosition(-1);
+                Claw.setPosition(1);
 
                 }
 //
@@ -271,6 +271,7 @@ public class Teleop_Mecanum_7247 extends LinearOpMode {
                  Slide.setTargetPosition(-1500);
                 Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 Slide.setPower(.8);
+                Wrist.setPosition(0);
                 }
 //
 //            }

@@ -154,8 +154,9 @@ public class Encoder_auto_7247 extends LinearOpMode {
         Slide.setTargetPosition(-1500);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Arm.setPower(.5);
-        Arm.setTargetPosition(-2900);
+        Arm.setTargetPosition(-2554);
         Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Wrist.setPosition(0);
 
         sleep(3000);
         Claw.setPosition(0);
